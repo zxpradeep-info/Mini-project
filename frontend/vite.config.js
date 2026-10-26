@@ -3,13 +3,21 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    preserveSymlinks: true,
+  },
   server: {
     port: 5173,
+    host: true,
+    fs: {
+      strict: false,
+      allow: ['..', 'D:/', 'C:/'],
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
-        changeOrigin: true
-      }
-    }
-  }
+        changeOrigin: true,
+      },
+    },
+  },
 });
