@@ -9,27 +9,38 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('placement_portal_token');
-    const savedUser = localStorage.getItem('placement_portal_user');
+    try {
+      const savedToken = localStorage.getItem('placement_portal_token');
+      const savedUser = localStorage.getItem('placement_portal_user');
 
-    if (savedToken && savedUser) {
-      try {
-        setToken(savedToken);
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
-        localStorage.removeItem('placement_portal_token');
-        localStorage.removeItem('placement_portal_user');
+      if (savedToken && savedUser) {
+        try {
+          setToken(savedToken);
+          setUser(JSON.parse(savedUser));
+        } catch (e) {
+          try {
+            localStorage.removeItem('placement_portal_token');
+            localStorage.removeItem('placement_portal_user');
+          } catch (storageErr) {}
+        }
       }
+    } catch (err) {
+      console.warn('LocalStorage error:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const saveAuth = (authData) => {
     const { token: jwtToken, user: userData } = authData;
     setToken(jwtToken);
     setUser(userData);
-    localStorage.setItem('placement_portal_token', jwtToken);
-    localStorage.setItem('placement_portal_user', JSON.stringify(userData));
+    try {
+      localStorage.setItem('placement_portal_token', jwtToken);
+      localStorage.setItem('placement_portal_user', JSON.stringify(userData));
+    } catch (err) {
+      console.warn('Failed to save to localStorage:', err);
+    }
   };
 
   const login = async (email, password, rememberMe = false) => {
@@ -149,14 +160,18 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('placement_portal_token');
-    localStorage.removeItem('placement_portal_user');
+    try {
+      localStorage.removeItem('placement_portal_token');
+      localStorage.removeItem('placement_portal_user');
+    } catch (e) {}
   };
 
   const updateUser = (newProfile) => {
     const updated = { ...user, ...newProfile };
     setUser(updated);
-    localStorage.setItem('placement_portal_user', JSON.stringify(updated));
+    try {
+      localStorage.setItem('placement_portal_user', JSON.stringify(updated));
+    } catch (e) {}
   };
 
   return (

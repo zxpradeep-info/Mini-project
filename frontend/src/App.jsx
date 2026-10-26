@@ -29,14 +29,16 @@ import CompanyProfilePage from './pages/company/CompanyProfilePage';
 // Common
 import SettingsPage from './pages/common/SettingsPage';
 
+const LoadingSpinner = () => (
+  <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -46,8 +48,12 @@ const ProtectedRoute = ({ children }) => {
 
 const RootRedirect = () => {
   const { isAuthenticated, isCompany, loading } = useAuth();
-  if (loading) return null;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
   return isCompany ? <Navigate to="/company" replace /> : <Navigate to="/dashboard" replace />;
 };
 
